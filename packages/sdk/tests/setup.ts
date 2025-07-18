@@ -2,6 +2,7 @@
 import { Connection, Keypair, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { BN, Wallet } from '@coral-xyz/anchor';
 import { PredictionMarketClient } from '../src/client-enhanced';
+import { PredictionMarketInstructions } from '../src/instructions';
 import { PROGRAM_ID } from '../src/constants';
 
 export class TestEnvironment {
@@ -73,7 +74,8 @@ export class TestEnvironment {
       this.platformAddress
     );
     
-    const [marketPda] = this.client.instructions.constructor.findMarketPDA(
+    // Fixed: Use static method correctly
+    const [marketPda] = PredictionMarketInstructions.findMarketPDA(
       this.payer.publicKey,
       marketId
     );
@@ -134,13 +136,9 @@ export class TestDataGenerator {
     if (count === 2) {
       return ['Yes', 'No'];
     }
-    
-    const options = [];
-    for (let i = 1; i <= count; i++) {
-      options.push(`Option ${i}`);
-    }
-    
-    return options;
+  
+  // Array.from is used to create an array of options dynamically
+    return Array.from({ length: count }, (_, i) => `Option ${i + 1}`);
   }
 
   static generateBetAmount(): BN {
@@ -175,7 +173,8 @@ export class TestAssertions {
     user: PublicKey,
     market: PublicKey
   ): Promise<void> {
-    const [userBetPda] = client.instructions.constructor.findUserBetPDA(user, market);
+    // Fixed: Use static method correctly
+    const [userBetPda] = PredictionMarketInstructions.findUserBetPDA(user, market);
     const userBet = await client.fetchUserBet(userBetPda);
     
     if (!userBet) {
